@@ -10,7 +10,8 @@ primary_region = 'fra'
 image = "sdevilcry/ticketmaster_scrapper:latest"
 
 [[vm]]
-  size = 'shared-cpu-1x'
+  size = 'shared-cpu-2x'
+  memory = "1gb"
 
 [processes]
 app = "node dist/ticketmaster.js"
@@ -20,3 +21,7 @@ strategy = "immediate"
 
 [[services]]
 processes = [ "app" ]
+
+[experimental]
+  auto_stop_machines = true
+  auto_start_machines = true
