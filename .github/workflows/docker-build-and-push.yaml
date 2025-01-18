@@ -39,7 +39,7 @@ jobs:
     with:
       fly_app_name: app-ticket-0507
     secrets:
-      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      fly_api_token: ${{ secrets.FLY_APP_0507 }}
       ticketmaster_url: ${{ secrets.TICKET_URL_0507 }}
 
   deploy-ticket-0607:
@@ -49,5 +49,5 @@ jobs:
     with:
       fly_app_name: app-ticket-0607
     secrets:
-      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      fly_api_token: ${{ secrets.FLY_APP_0607 }}
       ticketmaster_url: ${{ secrets.TICKET_URL_0607 }}
