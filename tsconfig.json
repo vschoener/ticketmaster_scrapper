@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 20",
+  "_version": "20.17.0",
+  "compilerOptions": {
+    "lib": [
+      "es2023"
+    ],
+    "module": "node16",
+    "target": "es2022",
+    "rootDir": "src",
+    // Source directory
+    "outDir": "dist",
+    // Output directory for compiled files
+    "strict": true,
+    // Enable all strict type-checking options
+    "esModuleInterop": true,
+    // Allow default imports from CommonJS modules
+    "skipLibCheck": true,
+    // Skip checking declaration files
+    "moduleResolution": "node16",
+    // Use Node.js module resolution strategy
+    "resolveJsonModule": true,
+    // Allow importing JSON files
+    "allowJs": true,
+    // Support compiling .js files
+    "declaration": true,
+    // Generate .d.ts declaration files
+    "sourceMap": true            // Generate source maps for debugging
+  },
+  "include": [
+    "src"
+  ],
+  // Include only the source directory
+  "exclude": [
+    "node_modules",
+    "dist"
+  ] // Exclude unnecessary directories
+}

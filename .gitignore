@@ -1,3 +1,4 @@
+.DS_Store
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -11,3 +12,14 @@
 
 #!.yarn/cache
 .pnp.*
+
+.envrc
+dist
+.idea
+node_modules
+
+data/*
+!data/.gitkeep
+
+.fleet/*
+*.log
