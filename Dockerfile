@@ -3,7 +3,7 @@ FROM node:20-slim AS base
 
 ENV YARN_VERSION=4.5.0
 
-RUN apt-get update && apt-get install -y chronium
+RUN apt-get update && apt-get install -y
 
 RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 
@@ -15,7 +15,6 @@ WORKDIR /app
 # COPY and install the project
 COPY . .
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 # Build the application (adjust command as per your project)
