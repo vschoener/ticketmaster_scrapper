@@ -1,0 +1,32 @@
+name: Reusable Deploy Workflow
+
+on:
+  workflow_call:
+    inputs:
+      fly_app_name:
+        description: "The Fly.io app name to deploy"
+        required: true
+        type: string
+
+    secrets:
+      fly_api_token:
+        required: true
+      ticketmaster_url:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Fly.io CLI
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy App
+        run: flyctl deploy --remote-only --app ${{ inputs.fly_app_name }}
+        env:
+          FLY_API_TOKEN: ${{ secrets.fly_api_token }}
+          TICKETMASTER_URL: ${{ secrets.ticketmaster_url }}

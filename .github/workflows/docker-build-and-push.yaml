@@ -32,23 +32,22 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/ticketmaster_scrapper:latest
 
-  deploy:
-    name: Deploy app
-    runs-on: ubuntu-latest
+  deploy-ticket-0507:
+    name: Deploy Ticket O507
     needs: build-and-push  # Ensures this job only runs if 'build-and-push' succeeds
-    concurrency: deploy-group
+    uses: ./.github/workflows/deploy.yml
+    with:
+      fly_app_name: app-ticket-0507
+    secrets:
+      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      ticketmaster_url: ${{ secrets.TICKET_URL_0507 }}
 
-    steps:
-      # Step 1: Check out the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Step 2: Set up Fly.io CLI
-      - name: Set up Fly.io CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      # Step 3: Deploy to Fly.io
-      - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  deploy-ticket-0607:
+    name: Deploy Ticket O607
+    needs: build-and-push  # Ensures this job only runs if 'build-and-push' succeeds
+    uses: ./.github/workflows/deploy.yml
+    with:
+      fly_app_name: app-ticket-0607
+    secrets:
+      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      ticketmaster_url: ${{ secrets.TICKET_URL_0607 }}

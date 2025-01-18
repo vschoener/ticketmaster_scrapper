@@ -5,21 +5,18 @@ on:
     - cron: "*/5 * * * *" # Runs every 5 minutes
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  deploy-ticket-0507:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      fly_app_name: app-ticket-0507
+    secrets:
+      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      ticketmaster_url: ${{ secrets.TICKET_URL_0507 }}
 
-    steps:
-      - name: Set up Fly.io CLI
-        uses: superfly/flyctl-actions/setup-flyctl@master
-
-      - name: Deploy Ticket O507
-        run: flyctl deploy --remote-only --app app-ticket-0507
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          TICKETMASTER_URL: ${{ secrets.TICKET_URL_0507 }}
-
-      - name: Deploy Ticket 0607
-        run: flyctl deploy --remote-only --app app-ticket-0607
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          TICKETMASTER_URL: ${{ secrets.TICKET_URL_0607 }}
+  deploy-ticket-0607:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      fly_app_name: app-ticket-0607
+    secrets:
+      fly_api_token: ${{ secrets.FLY_API_TOKEN }}
+      ticketmaster_url: ${{ secrets.TICKET_URL_0607 }}
