@@ -12,7 +12,14 @@ jobs:
       - name: Set up Fly.io CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
 
-      - name: Redeploy Fly.io App
-        run: flyctl deploy --remote-only
+      - name: Deploy Ticket O507
+        run: flyctl deploy --remote-only --app app-ticket-0507
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          TICKETMASTER_URL: ${{ secrets.TICKET_URL_0507 }}
+
+      - name: Deploy Ticket 0607
+        run: flyctl deploy --remote-only --app app-ticket-0607
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          TICKETMASTER_URL: ${{ secrets.TICKET_URL_0607 }}
