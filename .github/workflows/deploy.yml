@@ -11,8 +11,6 @@ on:
     secrets:
       fly_api_token:
         required: true
-      ticketmaster_url:
-        required: true
 
 jobs:
   deploy:
@@ -29,4 +27,3 @@ jobs:
         run: flyctl deploy --remote-only --app ${{ inputs.fly_app_name }}
         env:
           FLY_API_TOKEN: ${{ secrets.fly_api_token }}
-          TICKET_MASTER_LINK: ${{ secrets.ticketmaster_url }}
