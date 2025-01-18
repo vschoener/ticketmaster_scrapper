@@ -1,9 +1,7 @@
 # Stage 1: Build the application
-FROM node:20-slim AS base
+FROM ghcr.io/puppeteer/puppeteer:latest as base
 
 ENV YARN_VERSION=4.5.0
-
-RUN apt-get update && apt-get install -y
 
 RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 
