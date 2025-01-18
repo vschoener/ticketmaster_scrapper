@@ -29,7 +29,6 @@ WORKDIR /app
 
 # Copy only the production dependencies from the builder
 COPY --from=builder /app/package.json /app/yarn.lock ./
-COPY --from=builder /app/.yarn ./.yarn
 COPY --from=builder /app/.yarnrc.yml  ./
 RUN yarn workspaces focus --all --production && rm -rf "$(yarn cache clean)"
 

@@ -24,9 +24,9 @@ jobs:
       # Step 3: Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/puppeteer-app:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/ticketmaster_scrapper:latest .
 
       # Step 4: Push the Docker image
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/puppeteer-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/ticketmaster_scrapper:latest
