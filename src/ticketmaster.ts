@@ -63,7 +63,6 @@ async function run(logger: Logger) {
   logger.info('Starting the Puppeteer scraper')
 
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox'],
     slowMo: 250,
   })
   const page = await browser.newPage()
