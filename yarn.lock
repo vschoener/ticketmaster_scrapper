@@ -1256,6 +1256,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/user-agents@npm:^1":
+  version: 1.0.4
+  resolution: "@types/user-agents@npm:1.0.4"
+  checksum: 10/e76d540672ca549e9fe24ed99dd2322744afdff3cbd79c14f04b2560dec04b4045e9f520ae6309f5240e978a7fa8b174f8af99460a3de46bfd4aa20b20472452
+  languageName: node
+  linkType: hard
+
 "@types/ws@npm:^8.5.10":
   version: 8.5.13
   resolution: "@types/ws@npm:8.5.13"
@@ -4039,6 +4046,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10/957ed243f84ba6791d4992d5c222ffffca339a3b79dbe81d2eaf0c90504160b500641c5a0f56e27630030b18b8e971ea10b44f928a977d5ced3c8948841b555f
+  languageName: node
+  linkType: hard
+
 "lodash.memoize@npm:^4.1.2":
   version: 4.1.2
   resolution: "lodash.memoize@npm:4.1.2"
@@ -5026,6 +5040,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.17.0"
     "@types/jest": "npm:^29.5.14"
+    "@types/user-agents": "npm:^1"
     cloudinary: "npm:^2.5.1"
     discord.js: "npm:^14.17.3"
     eslint: "npm:^9.17.0"
@@ -5038,6 +5053,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.6.2"
     typescript-eslint: "npm:^8.19.0"
+    user-agents: "npm:^1.1.424"
     winston: "npm:^3.17.0"
   languageName: unknown
   linkType: soft
@@ -5665,6 +5681,15 @@ __metadata:
   dependencies:
     punycode: "npm:^2.1.0"
   checksum: 10/b271ca7e3d46b7160222e3afa3e531505161c9a4e097febae9664e4b59912f4cbe94861361a4175edac3a03fee99d91e44b6a58c17a634bc5a664b19fc76fbcb
+  languageName: node
+  linkType: hard
+
+"user-agents@npm:^1.1.424":
+  version: 1.1.424
+  resolution: "user-agents@npm:1.1.424"
+  dependencies:
+    lodash.clonedeep: "npm:^4.5.0"
+  checksum: 10/50293faf62b4d20db457c6e4cf6239f0a5f10a14ce470d172a510956f4def8b1e2a806a041c7aceff85e215563f27b46cfa70810e74597a5f83d9cc311915709
   languageName: node
   linkType: hard
 

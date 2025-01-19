@@ -4,6 +4,8 @@ import { getLogger } from './logger'
 import { sendDiscordAlert } from './discord'
 import { Logger } from 'winston'
 import { doScreenshot } from './imageHelper'
+import UserAgent from 'user-agents';
+import { sleep } from './helper'
 
 async function acceptCookiesFromPopup(
   page: Page,
@@ -33,6 +35,30 @@ type scrapObject = {
   }[]
 }
 
+async function has403Text(page: Page) {
+  // Check 403 and refresh
+  return await page.$eval('body', (body, textToFind) => {
+    return body.textContent.includes(textToFind);
+  }, 'You do not have permission to access the requested page'); 
+}
+
+async function handle403(page: Page) {
+  // Check 403 and refresh
+  const textExists403 = await has403Text(page)
+
+  if (textExists403) {
+    logger.info('403 detected, reloading the page...')
+    await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'] })
+    // Wait
+    sleep(3000)
+
+    if (await has403Text(page)) {
+      logger.info('403 persists. Abording...')
+      throw Error('403 detected a few times') 
+    }
+  }
+}
+
 async function run(logger: Logger) {
   const link = process.env['TICKET_MASTER_LINK'] ?? ''
   if (link.length === 0) {
@@ -44,6 +70,9 @@ async function run(logger: Logger) {
 
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
+  const userAgent = new UserAgent()
+  await page.setUserAgent(userAgent.toString())
+
 
   logger.info('Setting viewport')
   await page.setViewport({
@@ -56,18 +85,22 @@ async function run(logger: Logger) {
 
   logger.info('Navigating to URL: ' + link)
   await page.goto(link, { waitUntil: ['domcontentloaded', 'networkidle2'] })
+   // Wait
+   sleep(5000)
 
   const pageLoadedImage = await doScreenshot({
     fileName: 'page_loaded.png',
     logger,
     page,
-    force: true,
   })
-  sendDiscordAlert({
-    message: `Screenshot after page loaded`,
-    logger,
-    imagePath: pageLoadedImage,
-  })
+
+  // Check 403 and refresh
+  try {
+    await handle403(page)
+  } catch (e) {
+    // We return to avoid the machine restarting the machine
+    return
+  }
 
   await acceptCookiesFromPopup(
     page,
