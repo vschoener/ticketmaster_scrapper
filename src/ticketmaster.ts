@@ -73,16 +73,6 @@ async function run(logger: Logger) {
   const userAgent = new UserAgent()
   await page.setUserAgent(userAgent.toString())
 
-
-  logger.info('Setting viewport')
-  await page.setViewport({
-    // iPhone 16 pro res
-    width: 1206,
-    height: 2622,
-    hasTouch: true,
-    isMobile: true,
-  })
-
   logger.info('Navigating to URL: ' + link)
   await page.goto(link, { waitUntil: ['domcontentloaded', 'networkidle2'] })
    // Wait
