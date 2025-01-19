@@ -1,4 +1,7 @@
-import puppeteer, { Page } from 'puppeteer'
+
+import puppeteer from 'puppeteer-extra'
+import { Page } from 'puppeteer'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import scrapeIt from 'scrape-it'
 import { getLogger } from './logger'
 import { sendDiscordAlert } from './discord'
@@ -6,6 +9,8 @@ import { Logger } from 'winston'
 import { doScreenshot } from './imageHelper'
 import UserAgent from 'user-agents';
 import { sleep } from './helper'
+
+puppeteer.use(StealthPlugin())
 
 async function acceptCookiesFromPopup(
   page: Page,
@@ -68,10 +73,17 @@ async function run(logger: Logger) {
 
   logger.info('Starting the Puppeteer scraper')
 
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({ headless: true })
   const page = await browser.newPage()
   const userAgent = new UserAgent()
   await page.setUserAgent(userAgent.toString())
+
+
+  logger.info('Setting viewport')
+  await page.setViewport({
+    width: 1920 + Math.floor(Math.random() * 100),
+    height: 3000 + Math.floor(Math.random() * 100),
+  })
 
   logger.info('Navigating to URL: ' + link)
   await page.goto(link, { waitUntil: ['domcontentloaded', 'networkidle2'] })
