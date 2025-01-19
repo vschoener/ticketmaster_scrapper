@@ -8,13 +8,13 @@ jobs:
   deploy-ticket-0507:
     uses: ./.github/workflows/deploy.yml
     with:
-      fly_app_name: app-ticket-0507
+      fly_config: fly.0507.toml
     secrets:
       fly_api_token: ${{ secrets.FLY_APP_0507 }}
 
   deploy-ticket-0607:
     uses: ./.github/workflows/deploy.yml
     with:
-      fly_app_name: app-ticket-0607
+      fly_config: fly.0607.toml
     secrets:
       fly_api_token: ${{ secrets.FLY_APP_0607 }}

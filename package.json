@@ -10,9 +10,11 @@
     "tests": "jest",
     "build": "yarn run tsc",
     "lint": "eslint .",
-    "format": "prettier . --write"
+    "format": "prettier 'src/**/*.{js,ts,mjs,cjs,json}' --write"
   },
   "dependencies": {
+    "cloudinary": "^2.5.1",
+    "discord.js": "^14.17.3",
     "prettier": "^3.4.2",
     "puppeteer": "^24.1.0",
     "scrape-it": "^6.1.2",

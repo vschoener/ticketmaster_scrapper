@@ -7,11 +7,9 @@ export function getLogger() {
       winston.format.timestamp(),
       winston.format.printf(
         ({ timestamp, level, message }) =>
-          `${timestamp} [${level.toUpperCase()}]: ${message}`,
-      ),
+          `${timestamp} [${level.toUpperCase()}]: ${message}`
+      )
     ),
-    transports: [
-      new winston.transports.Console(),
-    ],
+    transports: [new winston.transports.Console()],
   })
 }

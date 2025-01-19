@@ -3,6 +3,7 @@ import scrapeIt from 'scrape-it'
 import { getLogger } from './logger'
 import { sendDiscordAlert } from './discord'
 import { Logger } from 'winston'
+import { doScreenshot } from './imageHelper'
 
 async function acceptCookiesFromPopup(
   page: Page,
@@ -32,33 +33,12 @@ type scrapObject = {
   }[]
 }
 
-async function doScreenshot({ fileName, logger, page }: {
-  fileName: string,
-  page: Page,
-  logger: Logger
-}) {
-  const screenShotEnabled = process.env['SCREENSHOT_ENABLED'] === 'true'
-
-  if (!screenShotEnabled) {
-    return
-  }
-
-  const screenshotPath = process.env['SCREENSHOT_FOLDER'] ?? __dirname + '/data/'
-  const path = `${screenshotPath}/${fileName}`
-
-  logger.info(`Taking screenshot in ${path}`)
-  await page.screenshot({
-    path,
-  })
-}
-
 async function run(logger: Logger) {
   const link = process.env['TICKET_MASTER_LINK'] ?? ''
   if (link.length === 0) {
     logger.error('No ticketmaster link provided')
     return
   }
-
 
   logger.info('Starting the Puppeteer scraper')
 
@@ -86,19 +66,40 @@ async function run(logger: Logger) {
   )
 
   await doScreenshot({ fileName: 'after_cookie.png', logger, page })
-
-  await page.screenshot({
-    path: __dirname + '/after_cookie.png',
-  })
-
-  // CLick on the "Quick choice by price button if it shows"
   const searchResultSelector = 'button.btn.event-choice-map-fast-btn'
-  await page.waitForSelector(searchResultSelector, {
-    visible: true, // Ensures the element is not only in the DOM but also visible
-  })
-  await page.click(searchResultSelector)
 
-  await doScreenshot({ fileName: 'after_wait_map.png', logger, page })
+  try {
+    await page.waitForSelector(searchResultSelector, {
+      visible: true, // Ensures the element is not only in the DOM but also visible
+      timeout: 3000,
+    })
+
+    // CLick on the "Quick choice by price button if it shows"
+    await page.click(searchResultSelector)
+  } catch (e) {
+    const imagePath = await doScreenshot({
+      fileName: 'after_wait_map.png',
+      logger,
+      page,
+      force: true,
+    })
+
+    sendDiscordAlert({
+      message: `${searchResultSelector} seems not available`,
+      logger,
+      imagePath,
+    })
+    logger.warn(
+      `Waited for ${searchResultSelector} but timeout. Maybe the element is already there?`,
+      { err: (e as Error).message },
+    )
+  }
+
+  await doScreenshot({
+    fileName: 'after_wait_map.png',
+    logger,
+    page,
+  })
 
   logger.info('Scraping content from the page')
   const pageContent = await page.content()
@@ -108,12 +109,10 @@ async function run(logger: Logger) {
       listItem: '.session-price-item',
       data: {
         title: {
-          selector:
-            '.session-price-cat-item-txt',
+          selector: '.session-price-cat-item-txt',
         },
         price: {
-          selector:
-            '.session-price-cat-item-price',
+          selector: '.session-price-cat-item-price',
         },
         quantityAvailable: {
           selector: '.event-ticket-qty-num',
@@ -123,14 +122,27 @@ async function run(logger: Logger) {
     },
   })
 
+  const imagePath = await doScreenshot({
+    fileName: 'last_status.jpg',
+    page,
+    force: true,
+    logger,
+  })
+
   await browser.close()
   logger.info('Browser closed')
 
-  logger.info('Tickets scrappet', { tickets })
+  logger.info('Tickets scrapped', { tickets })
   const availableTickets = tickets.filter((ticket) => ticket.content.length > 0)
 
   if (!availableTickets.length) {
     logger.info('No available tickets found')
+    await sendDiscordAlert({
+      message: `No ticket for ${link}`,
+      logger,
+      imagePath,
+    })
+
     return
   }
 
@@ -145,8 +157,13 @@ Tickets: ${availableTickets.map((ticket) => {
   })}
 `
 
-  await sendDiscordAlert(discordMessage, logger)
+  await sendDiscordAlert({
+    message: discordMessage,
+    logger,
+    imagePath: imagePath,
+  })
 }
 
 const logger = getLogger()
+
 run(logger).then(() => logger.info('Done'))

@@ -37,7 +37,7 @@ jobs:
     needs: build-and-push  # Ensures this job only runs if 'build-and-push' succeeds
     uses: ./.github/workflows/deploy.yml
     with:
-      fly_app_name: app-ticket-0507
+      fly_config: fly.0507.toml
     secrets:
       fly_api_token: ${{ secrets.FLY_APP_0507 }}
 
@@ -46,6 +46,6 @@ jobs:
     needs: build-and-push  # Ensures this job only runs if 'build-and-push' succeeds
     uses: ./.github/workflows/deploy.yml
     with:
-      fly_app_name: app-ticket-0607
+      fly_config: fly.0607.toml
     secrets:
       fly_api_token: ${{ secrets.FLY_APP_0607 }}

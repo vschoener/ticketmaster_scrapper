@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for app-ticket-0607 on 2025-01-18T19:49:38+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'app-ticket-0607'
+primary_region = 'fra'
+
+[build]
+  image = 'sdevilcry/ticketmaster_scrapper:latest'
+
+[deploy]
+  strategy = 'immediate'
+
+[processes]
+  app = 'node dist/ticketmaster.js'
+
+[[services]]
+  protocol = ''
+  internal_port = 0
+  ports = []
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-4x'
+  memory = '2gb'
