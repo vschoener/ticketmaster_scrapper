@@ -42,9 +42,7 @@ async function run(logger: Logger) {
 
   logger.info('Starting the Puppeteer scraper')
 
-  const browser = await puppeteer.launch({
-    slowMo: 250,
-  })
+  const browser = await puppeteer.launch()
   const page = await browser.newPage()
 
   logger.info('Setting viewport')
@@ -57,7 +55,19 @@ async function run(logger: Logger) {
   })
 
   logger.info('Navigating to URL: ' + link)
-  await page.goto(link)
+  await page.goto(link, { waitUntil: ['domcontentloaded', 'networkidle2'] })
+
+  const pageLoadedImage = await doScreenshot({
+    fileName: 'page_loaded.png',
+    logger,
+    page,
+    force: true,
+  })
+  sendDiscordAlert({
+    message: `Screenshot after page loaded`,
+    logger,
+    imagePath: pageLoadedImage,
+  })
 
   await acceptCookiesFromPopup(
     page,
@@ -65,7 +75,18 @@ async function run(logger: Logger) {
     '#onetrust-accept-btn-handler',
   )
 
-  await doScreenshot({ fileName: 'after_cookie.png', logger, page })
+  const cookieAcceptedImage = await doScreenshot({
+    fileName: 'after_cookie.png',
+    logger,
+    page,
+    force: true,
+  })
+  sendDiscordAlert({
+    message: `Screenshot after cookie accepted`,
+    logger,
+    imagePath: cookieAcceptedImage,
+  })
+
   const searchResultSelector = 'button.btn.event-choice-map-fast-btn'
 
   try {
@@ -89,10 +110,13 @@ async function run(logger: Logger) {
       logger,
       imagePath,
     })
-    logger.warn(
+    logger.error(
       `Waited for ${searchResultSelector} but timeout. Maybe the element is already there?`,
       { err: (e as Error).message },
     )
+
+    // No need to keep it without checking the screenshot
+    return
   }
 
   await doScreenshot({
@@ -132,9 +156,7 @@ async function run(logger: Logger) {
   await browser.close()
   logger.info('Browser closed')
 
-  logger.info('Tickets scrapped', { tickets })
   const availableTickets = tickets.filter((ticket) => ticket.content.length > 0)
-
   if (!availableTickets.length) {
     logger.info('No available tickets found')
     await sendDiscordAlert({
