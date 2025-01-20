@@ -40,24 +40,26 @@ type scrapObject = {
   }[]
 }
 
-async function has403Text(page: Page) {
-  // Check 403 and refresh
-  return await page.$eval('body', (body, textToFind) => {
-    return body.textContent.includes(textToFind);
-  }, 'You do not have permission to access the requested page'); 
+async function hasErrorContainer(page: Page) {
+  // Selector for the specific element
+  const selector = 'main#page-main div.error-container section.error h1';
+
+  // Check if the element exists
+  return await page.$(selector) !== null;
 }
 
-async function handle403(page: Page) {
+async function tryRefreshIfError(page: Page) {
   // Check 403 and refresh
-  const textExists403 = await has403Text(page)
+  const hasError = await hasErrorContainer(page)
 
-  if (textExists403) {
-    logger.info('403 detected, reloading the page...')
+  if (hasError) {
+    logger.info('Error container exist, try reloading the page...')
     await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'] })
     // Wait
     sleep(3000)
 
-    if (await has403Text(page)) {
+    // If error happens again, abort
+    if (await hasErrorContainer(page)) {
       logger.info('403 persists. Abording...')
       throw Error('403 detected a few times') 
     }
@@ -96,9 +98,9 @@ async function run(logger: Logger) {
     page,
   })
 
-  // Check 403 and refresh
+  // Check 403 or other error and refresh
   try {
-    await handle403(page)
+    await tryRefreshIfError(page)
   } catch (e) {
     // We return to avoid the machine restarting the machine
     return
