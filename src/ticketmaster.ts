@@ -40,32 +40,6 @@ type scrapObject = {
   }[]
 }
 
-async function hasErrorContainer(page: Page) {
-  // Selector for the specific element
-  const selector = 'main#page-main div.error-container section.error h1';
-
-  // Check if the element exists
-  return await page.$(selector) !== null;
-}
-
-async function tryRefreshIfError(page: Page) {
-  // Check 403 and refresh
-  const hasError = await hasErrorContainer(page)
-
-  if (hasError) {
-    logger.info('Error container exist, try reloading the page...')
-    await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'] })
-    // Wait
-    sleep(3000)
-
-    // If error happens again, abort
-    if (await hasErrorContainer(page)) {
-      logger.info('403 persists. Abording...')
-      throw Error('403 detected a few times') 
-    }
-  }
-}
-
 async function run(logger: Logger) {
   const link = process.env['TICKET_MASTER_LINK'] ?? ''
   if (link.length === 0) {
@@ -98,12 +72,29 @@ async function run(logger: Logger) {
     page,
   })
 
-  // Check 403 or other error and refresh
+
   try {
-    await tryRefreshIfError(page)
-  } catch (e) {
-    // We return to avoid the machine restarting the machine
+    await page.waitForSelector('main#page-main div.error-container', {
+      visible: true, // Ensures the element is not only in the DOM but also visible
+      timeout: 10000,
+    })
+
+    logger.info('Error container present, lets refresh')
+    await page.reload({ waitUntil: ['domcontentloaded', 'networkidle2'] })
+    // Wait
+    sleep(3000)
+
+    await page.waitForSelector('main#page-main div.error-container', {
+      visible: true, // Ensures the element is not only in the DOM but also visible
+      timeout: 10000,
+    })
+
+    logger.info('Error container still present, abort')
+
+    // If still present, exit
     return
+  } catch (e) {
+    logger.warn(`No error container shows`)
   }
 
   await acceptCookiesFromPopup(
