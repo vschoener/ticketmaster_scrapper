@@ -1,4 +1,3 @@
-
 import puppeteer from 'puppeteer-extra'
 import { Page } from 'puppeteer'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
@@ -7,7 +6,7 @@ import { getLogger } from './logger'
 import { sendDiscordAlert } from './discord'
 import { Logger } from 'winston'
 import { doScreenshot } from './imageHelper'
-import UserAgent from 'user-agents';
+import UserAgent from 'user-agents'
 import { sleep } from './helper'
 
 puppeteer.use(StealthPlugin())
@@ -15,7 +14,7 @@ puppeteer.use(StealthPlugin())
 async function acceptCookiesFromPopup(
   page: Page,
   popupSelector: string,
-  acceptButtonSelector: string,
+  acceptButtonSelector: string
 ) {
   try {
     logger.info('Waiting for the cookie consent popup to appear')
@@ -25,10 +24,8 @@ async function acceptCookiesFromPopup(
     await page.click(acceptButtonSelector)
 
     logger.info('Cookies accepted successfully')
-    return true
-  } catch (error) {
-    logger.error('Error handling the cookie popup: ' + error)
-    return false
+  } catch (e) {
+    logger.warn('Cookie popup seems missing')
   }
 }
 
@@ -54,7 +51,6 @@ async function run(logger: Logger) {
   const userAgent = new UserAgent()
   await page.setUserAgent(userAgent.toString())
 
-
   logger.info('Setting viewport')
   await page.setViewport({
     width: 1920 + Math.floor(Math.random() * 100),
@@ -63,15 +59,14 @@ async function run(logger: Logger) {
 
   logger.info('Navigating to URL: ' + link)
   await page.goto(link, { waitUntil: ['domcontentloaded', 'networkidle2'] })
-   // Wait
-   sleep(5000)
+  // Wait
+  sleep(5000)
 
   const pageLoadedImage = await doScreenshot({
     fileName: 'page_loaded.png',
     logger,
     page,
   })
-
 
   try {
     await page.waitForSelector('main#page-main div.error-container', {
@@ -97,27 +92,16 @@ async function run(logger: Logger) {
     logger.warn(`No error container shows`)
   }
 
+  // Not a blocker
   await acceptCookiesFromPopup(
     page,
     '.banner-content',
-    '#onetrust-accept-btn-handler',
+    '#onetrust-accept-btn-handler'
   )
 
-  const cookieAcceptedImage = await doScreenshot({
-    fileName: 'after_cookie.png',
-    logger,
-    page,
-    force: true,
-  })
-  sendDiscordAlert({
-    message: `Screenshot after cookie accepted`,
-    logger,
-    imagePath: cookieAcceptedImage,
-  })
-
-  const searchResultSelector = 'button.btn.event-choice-map-fast-btn'
-
+  // Handle map container if present (not always)
   try {
+    const searchResultSelector = 'button.btn.event-choice-map-fast-btn'
     await page.waitForSelector(searchResultSelector, {
       visible: true, // Ensures the element is not only in the DOM but also visible
       timeout: 3000,
@@ -126,32 +110,21 @@ async function run(logger: Logger) {
     // CLick on the "Quick choice by price button if it shows"
     await page.click(searchResultSelector)
   } catch (e) {
-    const imagePath = await doScreenshot({
-      fileName: 'after_wait_map.png',
-      logger,
-      page,
-      force: true,
-    })
-
-    sendDiscordAlert({
-      message: `${searchResultSelector} seems not available`,
-      logger,
-      imagePath,
-    })
-    logger.error(
-      `Waited for ${searchResultSelector} but timeout. Maybe the element is already there?`,
-      { err: (e as Error).message },
-    )
-
-    // No need to keep it without checking the screenshot
-    return
+    logger.info('Map selection seems missing, try to move on')
   }
 
-  await doScreenshot({
-    fileName: 'after_wait_map.png',
-    logger,
-    page,
-  })
+  // Check Session price, it's required to move on
+  try {
+    await page.waitForSelector('div.session-price', {
+      visible: true, // Ensures the element is not only in the DOM but also visible
+      timeout: 3000,
+    })
+
+    logger.info('Price session displayed')
+  } catch (e) {
+    logger.error('Price session missing, abort')
+    return
+  }
 
   logger.info('Scraping content from the page')
   const pageContent = await page.content()

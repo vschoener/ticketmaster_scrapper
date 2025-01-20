@@ -2,10 +2,10 @@ import { Logger } from 'winston'
 import { WebhookClient } from 'discord.js'
 
 export async function sendDiscordAlert({
-                                         message,
-                                         logger,
-                                         imagePath,
-                                       }: {
+  message,
+  logger,
+  imagePath,
+}: {
   message: string
   logger: Logger
   imagePath?: string
